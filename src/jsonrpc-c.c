@@ -16,7 +16,7 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 
-#include "config.h"
+//#include "config.h"
 #ifdef HAVE_STDBOOL_H
 # include <stdbool.h>
 #else
