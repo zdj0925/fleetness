@@ -35,6 +35,8 @@ typedef bool _Bool;
 #endif
 
 #include "jsonrpc-c.h"
+#define jrpclog printf
+#define fjrpclog fprintf
 
 static int __jrpc_server_start (struct jrpc_server *server);
 static void jrpc_procedure_destroy (struct jrpc_procedure *procedure);
@@ -57,7 +59,7 @@ static int send_response (struct jrpc_connection *conn, char *response)
     int fd = conn->fd;
 
     if (conn->debug_level > 1)
-        printf ("JSON Response:\n%s\n", response);
+        jrpclog ("JSON Response:\n%s\n", response);
     unused = write (fd, response, strlen (response));
     unused = write (fd, "\n", 1);
     return 0;
@@ -167,7 +169,7 @@ static int eval_request (struct jrpc_server *server, struct jrpc_connection *con
                         (id->type ==
                          cJSON_String) ? cJSON_CreateString (id->valuestring) : cJSON_CreateNumber (id->valueint);
                 if (server->debug_level)
-                    printf ("Method Invoked: %s\n", method->valuestring);
+                    jrpclog ("Method Invoked: %s\n", method->valuestring);
                 return invoke_procedure (server, conn, method->valuestring, params, id_copy);
             }
         }
@@ -218,7 +220,7 @@ static void connection_cb (struct ev_loop *loop, ev_io * w, int revents)
     {
         // client closed the sending half of the connection
         if (server->debug_level)
-            printf ("Client closed connection.\n");
+            jrpclog ("Client closed connection.\n");
         return close_connection (loop, w);
     }
     else
@@ -234,7 +236,7 @@ static void connection_cb (struct ev_loop *loop, ev_io * w, int revents)
             {
                 char *str_result = cJSON_Print (root);
 
-                printf ("Valid JSON Received:\n%s\n", str_result);
+                jrpclog ("Valid JSON Received:\n%s\n", str_result);
                 free (str_result);
             }
 
@@ -258,7 +260,7 @@ static void connection_cb (struct ev_loop *loop, ev_io * w, int revents)
             {
                 if (server->debug_level)
                 {
-                    printf ("INVALID JSON Received:\n---\n%s\n---\n", conn->buffer);
+                    jrpclog ("INVALID JSON Received:\n---\n%s\n---\n", conn->buffer);
                 }
                 send_error (conn, JRPC_PARSE_ERROR, strdup ("Parse error. Invalid JSON was received by the server."),
                             NULL);
@@ -290,7 +292,7 @@ static void accept_cb (struct ev_loop *loop, ev_io * w, int revents)
         if (((struct jrpc_server *) w->data)->debug_level)
         {
             inet_ntop (their_addr.ss_family, get_in_addr ((struct sockaddr *) &their_addr), s, sizeof s);
-            printf ("server: got connection from %s\n", s);
+            jrpclog ("server: got connection from %s\n", s);
         }
         ev_io_init (&connection_watcher->io, connection_cb, connection_watcher->fd, EV_READ);
         // copy pointer to struct jrpc_server
@@ -308,6 +310,7 @@ static void accept_cb (struct ev_loop *loop, ev_io * w, int revents)
 int jrpc_server_init (struct jrpc_server *server, int port_number)
 {
     loop = EV_DEFAULT;
+    jrpclog ("JSONRPC-C: Starting server on port %d\n", port_number);
     return jrpc_server_init_with_ev_loop (server, port_number, loop);
 }
 
@@ -323,7 +326,7 @@ int jrpc_server_init_with_ev_loop (struct jrpc_server *server, int port_number, 
     else
     {
         server->debug_level = strtol (debug_level_env, NULL, 10);
-        printf ("JSONRPC-C Debug level %d\n", server->debug_level);
+        jrpclog ("JSONRPC-C Debug level %d\n", server->debug_level);
     }
     return __jrpc_server_start (server);
 }
@@ -348,7 +351,7 @@ static int __jrpc_server_start (struct jrpc_server *server)
 
     if ((rv = getaddrinfo (NULL, PORT, &hints, &servinfo)) != 0)
     {
-        fprintf (stderr, "getaddrinfo: %s\n", gai_strerror (rv));
+        fjrpclog (stderr, "getaddrinfo: %s\n", gai_strerror (rv));
         return 1;
     }
 
@@ -388,7 +391,7 @@ static int __jrpc_server_start (struct jrpc_server *server)
 
     if (p == NULL)
     {
-        fprintf (stderr, "server: failed to bind\n");
+        fjrpclog (stderr, "server: failed to bind\n");
         return 2;
     }
 
@@ -400,7 +403,7 @@ static int __jrpc_server_start (struct jrpc_server *server)
         return -1;
     }
     if (server->debug_level)
-        printf ("server: waiting for connections...\n");
+        jrpclog ("server: waiting for connections...\n");
 
     ev_io_init (&server->listen_watcher, accept_cb, sockfd, EV_READ);
     server->listen_watcher.data = server;
@@ -524,7 +527,7 @@ int jrpc_deregister_procedure (struct jrpc_server *server, char *name)
     }
     else
     {
-        fprintf (stderr, "server : procedure '%s' not found\n", name);
+        fjrpclog (stderr, "server : procedure '%s' not found\n", name);
         return -1;
     }
     return 0;
