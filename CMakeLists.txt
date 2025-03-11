@@ -54,12 +54,14 @@ add_library(cjson STATIC ${CJSON_SOURCES})
 
 set(JSON_RPC_SOURCES 
     src/jsonrpc-c.c
+    src/rpcfunc.c
 )
 add_library(jsonrpc STATIC ${JSON_RPC_SOURCES})
+
 target_link_libraries(jsonrpc PRIVATE cjson)
 
 set(TEST_SOURCES
-    test/server.c
+    test/rpcserver.c
 )
 
 add_executable(${EXECUTABLE_NAME} ${TEST_SOURCES})
