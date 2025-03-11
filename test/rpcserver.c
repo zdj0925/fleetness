@@ -19,11 +19,12 @@
 #include <sys/wait.h>
 #include <signal.h>
 #include "jsonrpc-c.h"
+#include "rpcfunc.h"
 
 #define PORT 1234                      // the port users will be connecting to
 
 struct jrpc_server my_server;
-
+#if 0
 cJSON *say_hello (jrpc_context * ctx, cJSON * params, cJSON * id)
 {
     return cJSON_CreateString ("Hello!");
@@ -41,7 +42,7 @@ cJSON *notify (jrpc_context * ctx, cJSON * param, cJSON * id)
 {
     return NULL;
 }
-
+#endif
 cJSON *exit_server (jrpc_context * ctx, cJSON * params, cJSON * id)
 {
     jrpc_server_stop (&my_server);
@@ -51,7 +52,7 @@ cJSON *exit_server (jrpc_context * ctx, cJSON * params, cJSON * id)
 int main (void)
 {
     jrpc_server_init (&my_server, PORT);
-    my_server.debug_level = 1;
+    my_server.debug_level = 10;
     jrpc_register_procedure (&my_server, say_hello, "sayHello", NULL);
     jrpc_register_procedure (&my_server, add, "add", NULL);
     jrpc_register_procedure (&my_server, notify, "notify", NULL);
