@@ -32,6 +32,24 @@ cJSON *say_hello (jrpc_context * ctx, cJSON * params, cJSON * id)
         return cJSON_CreateString ("Hello, i`m fleetness!");
     }
     printf ("id: %s\n", id->valuestring);
+    for (int i = 0; i < cJSON_GetArraySize (params); i++)
+    {
+        switch (cJSON_GetArrayItem (params, i)->type)
+        {
+            case cJSON_String:
+                printf ("params[%d]: %s\n", i, cJSON_GetArrayItem (params, i)->valuestring);
+                break;
+            case cJSON_Number:
+                printf ("params[%d]: %d\n", i, cJSON_GetArrayItem (params, i)->valueint);
+                break;
+            case cJSON_Object:
+                printf ("params[%d]: %s\n", i, cJSON_GetArrayItem (params, i)->valuestring);
+                break;
+            default:
+                break;
+        }
+        printf ("params[%d]: %s\n", i, cJSON_GetArrayItem (params, i)->valuestring);
+    }
 
     //create a new json object
     returned = cJSON_CreateObject ();

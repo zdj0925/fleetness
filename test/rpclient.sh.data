@@ -3,4 +3,5 @@
 2|add     |{"method": "add", "params": [3,4], "id": "SOME_IDENTIFIER" }
 3|add     |{"method": "add", "params": [1,2,3,4,5,6,7,8,9,10,11], "id": "SOME_IDENTIFIER" }
 4|exit    |{"method":"exit"}
+5|sayhell2|{"method":"sayHello", "params": [ {"step": 2}, {"step": 3}], "id": "SOME_IDENTIFIER" }
 
